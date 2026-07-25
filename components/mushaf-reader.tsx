@@ -103,8 +103,9 @@ export function MushafReader({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(initialPage + 1);
-      else if (e.key === "ArrowLeft") go(initialPage - 1);
+      // RTL: kiri = maju (seterusnya), kanan = undur (sebelum)
+      if (e.key === "ArrowLeft") go(initialPage + 1);
+      else if (e.key === "ArrowRight") go(initialPage - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -140,15 +141,16 @@ export function MushafReader({
     return () => ro.disconnect();
   }, [centered, fontReady, initialPage, rows]);
 
+  // RTL: arah baca kanan→kiri, jadi "Seterusnya" di kiri, "Sebelum" di kanan.
   const NavBar = (
     <div className="flex items-center justify-between gap-3">
       <button
-        onClick={() => go(initialPage - 1)}
-        disabled={initialPage <= 1}
+        onClick={() => go(initialPage + 1)}
+        disabled={initialPage >= 604}
         className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
       >
         <IconChevronLeft size={16} />
-        Sebelum
+        Seterusnya
       </button>
 
       <div className="text-center">
@@ -157,11 +159,11 @@ export function MushafReader({
       </div>
 
       <button
-        onClick={() => go(initialPage + 1)}
-        disabled={initialPage >= 604}
+        onClick={() => go(initialPage - 1)}
+        disabled={initialPage <= 1}
         className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
       >
-        Seterusnya
+        Sebelum
         <IconChevronRight size={16} />
       </button>
     </div>
