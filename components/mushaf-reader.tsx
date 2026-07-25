@@ -155,7 +155,7 @@ export function MushafReader({
 
       <div className="text-center">
         <p className="text-sm font-bold text-fg-strong">
-          Muka Surat {initialPage}
+          {initialPage}
           <span className="font-normal text-muted"> / 604</span>
         </p>
         {juz && <p className="text-xs text-muted">Juzuk {juz}</p>}
