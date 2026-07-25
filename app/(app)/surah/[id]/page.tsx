@@ -59,24 +59,25 @@ export default async function SurahPage({
       />
 
       {/* Navigasi surah */}
+      {/* RTL: arah baca kanan→kiri — "seterusnya" di kiri, "sebelum" di kanan. */}
       <nav className="mt-10 flex items-center justify-between gap-3">
-        {prev ? (
-          <Link
-            href={`/surah/${prev}`}
-            className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2"
-          >
-            <IconChevronLeft size={17} />
-            Surah sebelum
-          </Link>
-        ) : (
-          <span />
-        )}
         {next ? (
           <Link
             href={`/surah/${next}`}
             className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2"
           >
+            <IconChevronLeft size={17} />
             Surah seterusnya
+          </Link>
+        ) : (
+          <span />
+        )}
+        {prev ? (
+          <Link
+            href={`/surah/${prev}`}
+            className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2"
+          >
+            Surah sebelum
             <IconChevronRight size={17} />
           </Link>
         ) : (
