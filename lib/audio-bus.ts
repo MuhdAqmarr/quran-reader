@@ -1,0 +1,25 @@
+"use client";
+
+import type { PlayMode } from "./stores/player";
+
+/** Bas ringkas: ayah card → AudioPlayer (satu <audio> global). */
+
+export interface PlayRequest {
+  chapterId: number;
+  chapterName: string;
+  verseKey: string;
+  mode: PlayMode;
+}
+
+type Handler = (req: PlayRequest) => void;
+
+const handlers = new Set<Handler>();
+
+export function requestPlay(req: PlayRequest): void {
+  handlers.forEach((h) => h(req));
+}
+
+export function onPlayRequest(h: Handler): () => void {
+  handlers.add(h);
+  return () => handlers.delete(h);
+}

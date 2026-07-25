@@ -1,26 +1,281 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   Quran Explorer — Design Tokens
+   Dark: midnight sapphire + emas (manuscript illumination)
+   Light: warm ivory + emerald tua + emas gelap
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light (default) — warm ivory manuscript */
+  --bg: #faf6ec;
+  --bg-2: #f2ebda;
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-strong: rgba(255, 253, 246, 0.82);
+  --surface-hover: rgba(255, 255, 255, 0.85);
+  --border: rgba(101, 78, 32, 0.14);
+  --border-strong: rgba(101, 78, 32, 0.22);
+  --fg: #2b2416;
+  --fg-strong: #1c1810;
+  --muted: #6f6650;
+  --gold-1: #8a6a1f;
+  --gold-2: #b8934a;
+  --gold-3: #d9b45c;
+  --gold-soft: rgba(164, 128, 46, 0.12);
+  --gold-border: rgba(164, 128, 46, 0.35);
+  --emerald: #0e6b57;
+  --emerald-soft: rgba(14, 107, 87, 0.1);
+  --glow: rgba(164, 128, 46, 0.18);
+  --shadow-color: rgba(94, 70, 24, 0.14);
+  --pattern-opacity: 0.05;
+  --scrollbar: rgba(101, 78, 32, 0.25);
+}
+
+.dark {
+  /* Dark — midnight sapphire illuminated with gold */
+  --bg: #06080f;
+  --bg-2: #0a0e1a;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-strong: rgba(13, 18, 34, 0.78);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --fg: #e9e4d6;
+  --fg-strong: #f7f2e4;
+  --muted: #979db0;
+  --gold-1: #e6c977;
+  --gold-2: #d4a94e;
+  --gold-3: #a87f2c;
+  --gold-soft: rgba(212, 169, 78, 0.1);
+  --gold-border: rgba(212, 169, 78, 0.35);
+  --emerald: #2fd4a7;
+  --emerald-soft: rgba(47, 212, 167, 0.09);
+  --glow: rgba(212, 169, 78, 0.22);
+  --shadow-color: rgba(0, 0, 0, 0.45);
+  --pattern-opacity: 0.035;
+  --scrollbar: rgba(212, 169, 78, 0.25);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-strong: var(--fg-strong);
+  --color-muted: var(--muted);
+  --color-gold-1: var(--gold-1);
+  --color-gold-2: var(--gold-2);
+  --color-gold-3: var(--gold-3);
+  --color-gold-soft: var(--gold-soft);
+  --color-emerald: var(--emerald);
+  --color-emerald-soft: var(--emerald-soft);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Arabic fonts (self-hosted, KFGQPC)
+   ============================================================ */
+
+@font-face {
+  font-family: "UthmanicHafs";
+  src: url("/fonts/UthmanicHafs1Ver18.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SurahNames";
+  src: url("/fonts/sura_names.woff2") format("woff2");
+  font-display: block;
+}
+
+.font-uthmanic {
+  font-family: "UthmanicHafs", serif;
+}
+
+.font-surah-names {
+  font-family: "SurahNames";
+  line-height: 1;
+}
+
+/* Mushaf glyph words (per-page QPC V2 families injected at runtime) */
+.quran-glyphs {
+  direction: rtl;
+  unicode-bidi: isolate;
+  text-align: right;
+  line-height: 1.85;
+  word-spacing: 0.02em;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.45s ease, color 0.45s ease;
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--fg-strong);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============================================================
+   Glass utilities
+   ============================================================ */
+
+@utility glass-card {
+  background: var(--surface);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 28px -8px var(--shadow-color);
+}
+
+@utility glass-strong {
+  background: var(--surface-strong);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 12px 40px -12px var(--shadow-color);
+}
+
+@utility text-gold {
+  color: var(--gold-2);
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(135deg, var(--gold-1) 0%, var(--gold-2) 55%, var(--gold-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility border-gold {
+  border-color: var(--gold-border);
+}
+
+@utility ring-gold-glow {
+  box-shadow:
+    0 0 0 1px var(--gold-border),
+    0 0 24px -4px var(--glow);
+}
+
+/* ============================================================
+   Background: gradient mesh + Islamic 8-point star lattice
+   ============================================================ */
+
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(52rem 36rem at 82% -10%, var(--gold-soft), transparent 60%),
+    radial-gradient(44rem 32rem at -12% 30%, var(--emerald-soft), transparent 60%),
+    radial-gradient(40rem 40rem at 110% 90%, var(--gold-soft), transparent 65%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  transition: opacity 0.45s ease;
+}
+
+/* 8-point star (khatam) tessellation, drawn once, tinted via currentColor mask */
+.bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--pattern-opacity);
+  color: var(--gold-2);
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='24' y='24' width='24' height='24'/%3E%3Crect x='24' y='24' width='24' height='24' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='4.5'/%3E%3Cpath d='M0 24 L12 36 L0 48 M72 24 L60 36 L72 48 M24 0 L36 12 L48 0 M24 72 L36 60 L48 72'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat;
+  -webkit-mask-size: 72px 72px;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='24' y='24' width='24' height='24'/%3E%3Crect x='24' y='24' width='24' height='24' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='4.5'/%3E%3Cpath d='M0 24 L12 36 L0 48 M72 24 L60 36 L72 48 M24 0 L36 12 L48 0 M24 72 L36 60 L48 72'/%3E%3C/g%3E%3C/svg%3E");
+  mask-repeat: repeat;
+  mask-size: 72px 72px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Ornaments
+   ============================================================ */
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--gold-2);
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+}
+
+/* Active ayah gold pulse (audio playing) */
+@keyframes ayah-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--gold-border), 0 0 20px -6px var(--glow);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--gold-border), 0 0 34px -4px var(--glow);
+  }
+}
+
+.ayah-active {
+  animation: ayah-glow 2.4s ease-in-out infinite;
+  border-color: var(--gold-border) !important;
+}
+
+/* Tafsir prose (rendered HTML from API) */
+.tafsir-prose {
+  font-size: 0.925rem;
+  line-height: 1.75;
+  color: var(--fg);
+}
+.tafsir-prose h1, .tafsir-prose h2, .tafsir-prose h3 {
+  color: var(--fg-strong);
+  font-weight: 700;
+  margin: 1.1em 0 0.45em;
+  font-size: 1.02em;
+}
+.tafsir-prose p {
+  margin: 0.6em 0;
+}
+.tafsir-prose [dir="rtl"], .tafsir-prose .arabic {
+  font-family: "UthmanicHafs", serif;
+  font-size: 1.35em;
+  line-height: 2;
 }
