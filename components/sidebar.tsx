@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import type { Chapter } from "@/lib/types";
 import { cn, revelationPlaceMs } from "@/lib/utils";
 import { IconSearch, IconX } from "./icons";

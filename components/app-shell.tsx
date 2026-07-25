@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Chapter } from "@/lib/types";
 import { Sidebar } from "./sidebar";
 import { ThemeToggle } from "./theme-toggle";
+import { BookmarksButton } from "./bookmarks-sheet";
 import { IconMenu, IconX } from "./icons";
 
 export function AppShell({
@@ -77,6 +78,7 @@ export function AppShell({
             <Brand compact />
           </Link>
           <div className="flex-1" />
+          <BookmarksButton chapters={chapters} />
           <ThemeToggle />
         </header>
 

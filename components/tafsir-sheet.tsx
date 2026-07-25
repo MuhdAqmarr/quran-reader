@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import DOMPurify from "isomorphic-dompurify";
 import type { TafsirResponse } from "@/lib/types";
@@ -13,7 +14,12 @@ const SOURCES = [
   { id: TAFSIR_AR, label: "Muyassar", lang: "العربية" },
 ] as const;
 
-const cache = new Map<string, string>();
+async function fetchTafsir(sourceId: number, verseKey: string): Promise<string> {
+  const r = await fetch(`/api/tafsir?id=${sourceId}&key=${verseKey}`);
+  if (!r.ok) throw new Error("tafsir");
+  const data = (await r.json()) as TafsirResponse;
+  return DOMPurify.sanitize(data.tafsir.text ?? "");
+}
 
 export function TafsirSheet({
   open,
@@ -29,41 +35,13 @@ export function TafsirSheet({
   verseNumber: number;
 }) {
   const [sourceId, setSourceId] = useState<number>(TAFSIR_EN);
-  const [html, setHtml] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    const cacheKey = `${sourceId}:${verseKey}`;
-    const cached = cache.get(cacheKey);
-    if (cached !== undefined) {
-      setHtml(cached);
-      setError(false);
-      return;
-    }
-
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    fetch(`/api/tafsir?id=${sourceId}&key=${verseKey}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("tafsir");
-        return r.json() as Promise<TafsirResponse>;
-      })
-      .then((data) => {
-        if (cancelled) return;
-        const clean = DOMPurify.sanitize(data.tafsir.text ?? "");
-        cache.set(cacheKey, clean);
-        setHtml(clean);
-      })
-      .catch(() => !cancelled && setError(true))
-      .finally(() => !cancelled && setLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open, sourceId, verseKey]);
+  const { data: html = "", isLoading: loading, isError: error } = useQuery({
+    queryKey: ["tafsir", sourceId, verseKey],
+    queryFn: () => fetchTafsir(sourceId, verseKey),
+    enabled: open,
+    staleTime: Infinity,
+  });
 
   // Kunci scroll body bila sheet terbuka
   useEffect(() => {

@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useBookmarks } from "@/lib/stores/bookmarks";
+import { useMounted } from "@/lib/use-mounted";
 import { IconBookOpen, IconChevronRight } from "./icons";
 
 export function ResumeCard() {
   const lastRead = useBookmarks((s) => s.lastRead);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   if (!mounted || !lastRead) return null;
 
