@@ -15,7 +15,10 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      aria-label={isDark ? "Tukar ke mod cerah" : "Tukar ke mod gelap"}
+      suppressHydrationWarning
+      aria-label={
+        !mounted ? "Tukar tema" : isDark ? "Tukar ke mod cerah" : "Tukar ke mod gelap"
+      }
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="glass-card grid h-10 w-10 place-items-center rounded-full text-fg transition hover:text-gold-2 hover:ring-gold-glow"
     >

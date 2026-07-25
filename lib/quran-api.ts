@@ -14,16 +14,15 @@ import type {
  * Tiada teks Quran di-hardcode dalam codebase ini.
  */
 
+import { TAFSIR_AR, TAFSIR_EN, TRANSLATION_EN, TRANSLATION_MS } from "./constants";
+
 const API = "https://api.quran.com/api/v4";
 const QDC = "https://api.quran.com/api/qdc";
 
 /** Teks Quran immutable — cache seminggu, serve stale sementara revalidate. */
 const WEEK = 604_800;
 
-export const TRANSLATION_MS = 39; // Abdullah Muhammad Basmeih (Melayu)
-export const TRANSLATION_EN = 20; // Saheeh International
-export const TAFSIR_EN = 169; // Ibn Kathir (Abridged, English)
-export const TAFSIR_AR = 16; // Tafsir Muyassar (Arab)
+export { TAFSIR_AR, TAFSIR_EN, TRANSLATION_EN, TRANSLATION_MS };
 
 const VERSE_FIELDS = "text_uthmani,page_number,juz_number";
 const WORD_FIELDS = "code_v2,text_uthmani,page_number,line_number,char_type_name";

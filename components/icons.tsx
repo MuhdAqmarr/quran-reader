@@ -179,3 +179,9 @@ export const IconClock = (p: IconProps) => (
     <path d="M12 7.5V12l3 2" />
   </svg>
 );
+
+export const IconCheck = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M5 13l4 4L19 7" />
+  </svg>
+);

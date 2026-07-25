@@ -5,7 +5,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Chapter, ChapterAudioResponse, VerseTiming } from "@/lib/types";
 import { findTiming, usePlayer, verseKeyAtMs } from "@/lib/stores/player";
 import { useSettings } from "@/lib/stores/settings";
-import { onPlayRequest, requestPlay, type PlayRequest } from "@/lib/audio-bus";
+import {
+  onControl,
+  onPlayRequest,
+  requestPlay,
+  type ControlAction,
+  type PlayRequest,
+} from "@/lib/audio-bus";
 import { RECITERS, getReciter } from "@/lib/reciters";
 import { parseVerseKey } from "@/lib/utils";
 import {
@@ -194,6 +200,17 @@ export function AudioPlayer({ chapters }: { chapters: Chapter[] }) {
     },
     [chapterName, setReciter]
   );
+
+  // Saluran kawalan dari ayah card
+  useEffect(() => {
+    const handle = (action: ControlAction) => {
+      if (action === "toggle") togglePlay();
+      else if (action === "pause") audioRef.current?.pause();
+      else if (action === "next") step(1);
+      else if (action === "prev") step(-1);
+    };
+    return onControl(handle);
+  }, [togglePlay, step]);
 
   // MediaSession (kawalan skrin kunci)
   useEffect(() => {
