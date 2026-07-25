@@ -44,7 +44,9 @@ export function QuranWords({
       {fontReady ? (
         words.map((w, i) => (
           <span key={w.id}>
-            {i > 0 && " "}
+            {/* zero-width space = peluang patah baris tanpa jarak tambahan
+                (glyph QPC sudah ada spacing sendiri) */}
+            {i > 0 && "\u200B"}
             <span
               data-word={w.char_type_name}
               style={{ fontFamily: pageFontFamily(w.page_number) }}

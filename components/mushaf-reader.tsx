@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
@@ -51,7 +51,6 @@ function buildRows(res: VersesResponse): Row[] {
   }
   flush();
 
-  // Baris terakhir sebelum surah baru = jangan regang penuh
   rows.forEach((r, i) => {
     if (r.kind === "line") {
       const next = rows[i + 1];
@@ -77,7 +76,7 @@ export function MushafReader({
 }) {
   const router = useRouter();
 
-  const { data, isFetching } = useQuery({
+  const { data } = useQuery({
     queryKey: ["page", initialPage],
     queryFn: () => fetchPage(initialPage),
     initialData,
@@ -87,8 +86,8 @@ export function MushafReader({
   const fontReady = usePagesFont([initialPage]);
   const rows = useMemo(() => buildRows(data), [data]);
   const centered = initialPage <= 2;
-
   const juz = data.verses[0]?.juz_number;
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const go = useCallback(
     (page: number) => {
@@ -111,35 +110,65 @@ export function MushafReader({
     return () => window.removeEventListener("keydown", onKey);
   }, [go, initialPage]);
 
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-6 pb-28 sm:px-6">
-      {/* Kawalan atas */}
-      <div className="mb-5 flex items-center justify-between">
-        <button
-          onClick={() => go(initialPage - 1)}
-          disabled={initialPage <= 1}
-          className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
-        >
-          <IconChevronLeft size={16} />
-          Sebelum
-        </button>
+  /**
+   * Auto-fit: satu font-size seragam supaya setiap baris penuh lebar
+   * (glyph QPC sudah ada spacing sendiri — tiada justify, tiada gap besar).
+   */
+  useLayoutEffect(() => {
+    const body = bodyRef.current;
+    if (centered || !fontReady || !body) return;
 
-        <div className="text-center">
-          <p className="text-sm font-bold text-fg-strong">Muka Surat {initialPage}</p>
-          {juz && <p className="text-xs text-muted">Juzuk {juz} · dari 604</p>}
-        </div>
+    const fit = () => {
+      const lines = body.querySelectorAll<HTMLElement>("[data-fit-line]");
+      if (!lines.length) return;
+      const avail = body.clientWidth;
+      let natural = 0;
+      lines.forEach((l) => {
+        natural = Math.max(natural, l.scrollWidth);
+      });
+      if (!avail || !natural) return;
+      const current = parseFloat(getComputedStyle(lines[0]).fontSize) || 32;
+      const target = Math.max(14, Math.min((current * avail) / natural * 0.99, 60));
+      if (Math.abs(target - current) > 0.5) {
+        body.style.setProperty("--mushaf-font", `${target}px`);
+      }
+    };
 
-        <button
-          onClick={() => go(initialPage + 1)}
-          disabled={initialPage >= 604}
-          className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
-        >
-          Seterusnya
-          <IconChevronRight size={16} />
-        </button>
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(body);
+    return () => ro.disconnect();
+  }, [centered, fontReady, initialPage, rows]);
+
+  const NavBar = (
+    <div className="flex items-center justify-between gap-3">
+      <button
+        onClick={() => go(initialPage - 1)}
+        disabled={initialPage <= 1}
+        className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
+      >
+        <IconChevronLeft size={16} />
+        Sebelum
+      </button>
+
+      <div className="text-center">
+        <p className="text-sm font-bold text-fg-strong">Muka Surat {initialPage}</p>
+        {juz && <p className="text-xs text-muted">Juzuk {juz} · dari 604</p>}
       </div>
 
-      {/* Halaman mushaf */}
+      <button
+        onClick={() => go(initialPage + 1)}
+        disabled={initialPage >= 604}
+        className="glass-card inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-fg transition hover:text-gold-2 disabled:pointer-events-none disabled:opacity-40"
+      >
+        Seterusnya
+        <IconChevronRight size={16} />
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-28 sm:px-6">
       <AnimatePresence mode="wait">
         <motion.div
           key={initialPage}
@@ -155,7 +184,15 @@ export function MushafReader({
                 <span>Memuat mushaf…</span>
               </div>
             ) : (
-              <div className="space-y-1 py-2">
+              <div
+                ref={bodyRef}
+                className="space-y-2 py-2"
+                style={
+                  centered
+                    ? undefined
+                    : ({ "--mushaf-font": "clamp(17px, 5.4vw, 40px)" } as React.CSSProperties)
+                }
+              >
                 {rows.map((row, i) => {
                   if (row.kind === "header") {
                     return <MushafBanner key={`h-${i}`} chapterId={row.chapterId} />;
@@ -172,14 +209,7 @@ export function MushafReader({
                       </p>
                     );
                   }
-                  return (
-                    <MushafLine
-                      key={`l-${row.line}-${i}`}
-                      words={row.words}
-                      centered={centered}
-                      terminal={row.terminal}
-                    />
-                  );
+                  return <MushafLine key={`l-${row.line}-${i}`} words={row.words} centered={centered} />;
                 })}
               </div>
             )}
@@ -187,50 +217,57 @@ export function MushafReader({
         </motion.div>
       </AnimatePresence>
 
-      {isFetching && !fontReady && (
-        <p className="mt-4 text-center text-xs text-muted">Memuat…</p>
-      )}
+      {/* Navigasi di bawah */}
+      <div className="mt-6">{NavBar}</div>
 
-      <p className="mt-6 text-center text-[11px] text-muted">
+      <p className="mt-4 text-center text-[11px] text-muted">
         Mushaf KFGQPC Madinah · Gunakan anak panah ← → untuk selak muka surat
       </p>
     </div>
   );
 }
 
-/** Satu baris mushaf — glyph regang penuh (justify) macam cetakan sebenar. */
-function MushafLine({
-  words,
-  centered,
-  terminal,
-}: {
-  words: Word[];
-  centered: boolean;
-  terminal: boolean;
-}) {
-  const alignLast = centered || terminal ? "center" : "justify";
+/**
+ * Satu baris mushaf — glyph dirender rapat (concatenated) mengikut reka bentuk
+ * font QPC per muka surat. Saiz font di-auto-fit supaya baris penuh lebar.
+ */
+function MushafLine({ words, centered }: { words: Word[]; centered: boolean }) {
+  if (centered) {
+    return (
+      <div
+        dir="rtl"
+        lang="ar"
+        translate="no"
+        className="quran-glyphs select-none whitespace-nowrap py-1 text-center text-fg-strong"
+        style={{ fontSize: "clamp(1.4rem, 5.5vw, 2.2rem)", lineHeight: 2, textAlign: "center" }}
+      >
+        {words.map((w) => (
+          <span key={w.id} style={{ fontFamily: pageFontFamily(w.page_number) }}>
+            {w.code_v2}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div
+      data-fit-line
       dir="rtl"
       lang="ar"
       translate="no"
-      className="quran-glyphs select-none text-[1.6rem] leading-[2.15] text-fg-strong sm:text-[2rem]"
-      style={{
-        textAlign: centered ? "center" : "justify",
-        textAlignLast: alignLast as "center" | "justify",
-      }}
+      className="quran-glyphs select-none whitespace-nowrap text-center text-fg-strong"
+      style={{ fontSize: "var(--mushaf-font)", lineHeight: 2.05, textAlign: "center" }}
     >
-      {words.map((w, i) => (
-        <span key={w.id}>
-          {i > 0 && " "}
-          <span style={{ fontFamily: pageFontFamily(w.page_number) }}>{w.code_v2}</span>
+      {words.map((w) => (
+        <span key={w.id} style={{ fontFamily: pageFontFamily(w.page_number) }}>
+          {w.code_v2}
         </span>
       ))}
     </div>
   );
 }
 
-/** Banner nama surah dalam mod baca. */
 function MushafBanner({ chapterId }: { chapterId: number }) {
   return (
     <div className="my-3 flex items-center justify-center gap-3 py-1">
@@ -243,10 +280,9 @@ function MushafBanner({ chapterId }: { chapterId: number }) {
   );
 }
 
-/** Bingkai halaman mushaf ringkas. */
 function SurahFrameLite({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass-card relative rounded-3xl px-5 py-6 sm:px-10 sm:py-9">
+    <div className="glass-card relative rounded-3xl px-4 py-6 sm:px-10 sm:py-9">
       <div
         className="pointer-events-none absolute inset-3 rounded-2xl border opacity-40"
         style={{ borderColor: "var(--gold-border)" }}
