@@ -185,3 +185,37 @@ export const IconCheck = (p: IconProps) => (
     <path d="M5 13l4 4L19 7" />
   </svg>
 );
+
+/** Makki — Kaaba */
+export const IconKaaba = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 8.5 12 5l8 3.5v7L12 19l-8-3.5v-7Z" />
+    <path d="M4 8.5 12 12l8-3.5M12 12v7" />
+    <path d="M4 10.5 20 10.5" opacity="0.9" />
+  </svg>
+);
+
+/** Madani — kubah masjid */
+export const IconMosque = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M5 20v-6.5a7 7 0 0 1 14 0V20" />
+    <path d="M3.5 20h17" />
+    <path d="M12 3.2c1.6 1.4 2.4 2.6 2.4 3.8M12 3.2c-1.6 1.4-2.4 2.6-2.4 3.8" />
+    <path d="M8 20v-3.2a1 1 0 0 1 1-1h.4M16 20v-3.2a1 1 0 0 0-1-1h-.4" />
+  </svg>
+);
+
+/** Juz — lapisan */
+export const IconLayers = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m12 3 9 4.8-9 4.8L3 7.8 12 3Z" />
+    <path d="m3 12 9 4.8L21 12M3 16.4l9 4.8 9-4.8" opacity="0.75" />
+  </svg>
+);
+
+/** ⌘ */
+export const IconCommand = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6Z" />
+  </svg>
+);
