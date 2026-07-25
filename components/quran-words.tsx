@@ -42,13 +42,15 @@ export function QuranWords({
       className={cn("quran-glyphs select-none text-fg-strong", SCALE_CLASS[scale], className)}
     >
       {fontReady ? (
-        words.map((w) => (
-          <span
-            key={w.id}
-            data-word={w.char_type_name}
-            style={{ fontFamily: pageFontFamily(w.page_number) }}
-          >
-            {w.code_v2}
+        words.map((w, i) => (
+          <span key={w.id}>
+            {i > 0 && " "}
+            <span
+              data-word={w.char_type_name}
+              style={{ fontFamily: pageFontFamily(w.page_number) }}
+            >
+              {w.code_v2}
+            </span>
           </span>
         ))
       ) : (
