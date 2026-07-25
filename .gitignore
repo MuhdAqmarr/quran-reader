@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# source material (fonts dah dicopy ke public/fonts/qpc)
+Archive/
+Archive.zip
+.DS_Store
