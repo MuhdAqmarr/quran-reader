@@ -213,6 +213,16 @@ export const IconLayers = (p: IconProps) => (
   </svg>
 );
 
+/** Auto-sambung — kitar berterusan */
+export const IconRepeat = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m17 2 4 4-4 4" />
+    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+    <path d="m7 22-4-4 4-4" />
+    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+  </svg>
+);
+
 /** ⌘ */
 export const IconCommand = (p: IconProps) => (
   <svg {...base(p)}>

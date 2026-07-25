@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Chapter, ChapterAudioResponse, VerseTiming } from "@/lib/types";
 import { findTiming, usePlayer, verseKeyAtMs } from "@/lib/stores/player";
@@ -20,6 +21,7 @@ import {
   IconPause,
   IconPlay,
   IconPrev,
+  IconRepeat,
   IconSpinner,
   IconX,
 } from "./icons";
@@ -47,10 +49,14 @@ function fmt(sec: number): string {
 
 export function AudioPlayer({ chapters }: { chapters: Chapter[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
   const player = usePlayer();
   const reciterId = useSettings((s) => s.reciterId);
   const autoScroll = useSettings((s) => s.autoScroll);
+  const autoPlayNext = useSettings((s) => s.autoPlayNext);
   const setReciter = useSettings((s) => s.setReciter);
+  const setAutoPlayNext = useSettings((s) => s.setAutoPlayNext);
   const [reciterOpen, setReciterOpen] = useState(false);
 
   const chapterName = useCallback(
@@ -149,8 +155,27 @@ export function AudioPlayer({ chapters }: { chapters: Chapter[] }) {
   }, []);
 
   const onEnded = useCallback(() => {
+    const st = usePlayer.getState();
+    const chapterId = st.chapterId;
+
+    // Auto-sambung surah seterusnya (jika dihidupkan)
+    if (useSettings.getState().autoPlayNext && chapterId && chapterId < 114) {
+      const next = chapterId + 1;
+      // Kalau pengguna sedang baca surah yang baru tamat, ikut ke surah seterusnya
+      if (pathname === `/surah/${chapterId}`) {
+        router.push(`/surah/${next}`);
+      }
+      requestPlay({
+        chapterId: next,
+        chapterName: chapterName(next),
+        verseKey: `${next}:1`,
+        mode: "continuous",
+      });
+      return;
+    }
+
     usePlayer.getState().set({ isPlaying: false, activeVerseKey: null });
-  }, []);
+  }, [chapterName, pathname, router]);
 
   const togglePlay = useCallback(async () => {
     const audio = audioRef.current;
@@ -329,6 +354,35 @@ export function AudioPlayer({ chapters }: { chapters: Chapter[] }) {
                     </AnimatePresence>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setAutoPlayNext(!autoPlayNext)}
+                  aria-label="Auto-sambung surah seterusnya"
+                  aria-pressed={autoPlayNext}
+                  title={
+                    autoPlayNext
+                      ? "Auto-sambung: HIDUP — surah seterusnya akan dimainkan"
+                      : "Auto-sambung: MATI"
+                  }
+                  className={`hidden h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition sm:flex ${
+                    autoPlayNext
+                      ? "bg-gold-soft text-gold-2 ring-gold-glow"
+                      : "text-muted hover:text-fg"
+                  }`}
+                >
+                  <IconRepeat size={15} />
+                  Auto
+                </button>
+                <button
+                  onClick={() => setAutoPlayNext(!autoPlayNext)}
+                  aria-label="Auto-sambung surah seterusnya"
+                  aria-pressed={autoPlayNext}
+                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition sm:hidden ${
+                    autoPlayNext ? "bg-gold-soft text-gold-2" : "text-muted hover:text-fg"
+                  }`}
+                >
+                  <IconRepeat size={17} />
+                </button>
 
                 <button
                   onClick={() => {

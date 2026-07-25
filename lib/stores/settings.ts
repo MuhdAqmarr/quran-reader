@@ -11,10 +11,13 @@ interface SettingsState {
   showEnglish: boolean;
   arabicScale: ArabicScale;
   autoScroll: boolean;
+  /** Sambung recite surah seterusnya bila satu surah tamat. */
+  autoPlayNext: boolean;
   setReciter: (id: number) => void;
   setShowEnglish: (v: boolean) => void;
   setArabicScale: (v: ArabicScale) => void;
   setAutoScroll: (v: boolean) => void;
+  setAutoPlayNext: (v: boolean) => void;
 }
 
 export const useSettings = create<SettingsState>()(
@@ -24,10 +27,12 @@ export const useSettings = create<SettingsState>()(
       showEnglish: false,
       arabicScale: 2,
       autoScroll: true,
+      autoPlayNext: false,
       setReciter: (reciterId) => set({ reciterId }),
       setShowEnglish: (showEnglish) => set({ showEnglish }),
       setArabicScale: (arabicScale) => set({ arabicScale }),
       setAutoScroll: (autoScroll) => set({ autoScroll }),
+      setAutoPlayNext: (autoPlayNext) => set({ autoPlayNext }),
     }),
     { name: "qe-settings" }
   )
