@@ -44,3 +44,7 @@ next-env.d.ts
 Archive/
 Archive.zip
 .DS_Store
+
+# Cloudflare Workers
+.open-next/
+.wrangler/

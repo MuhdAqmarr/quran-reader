@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import type { TafsirResponse } from "@/lib/types";
 import { TAFSIR_AR, TAFSIR_EN } from "@/lib/constants";
 import { IconSpinner, IconX } from "./icons";
